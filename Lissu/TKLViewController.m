@@ -10,6 +10,7 @@
 #import "AFNetworking.h"
 
 #import "TKLViewController.h"
+#import "TKLBusAnnotation.h"
 
 
 @interface TKLViewController ()
@@ -21,7 +22,16 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+
+    // Add location button
+    MKUserTrackingBarButtonItem *locationButton = [[MKUserTrackingBarButtonItem alloc] initWithMapView:self.mapView];
+    self.navigationItem.leftBarButtonItem = locationButton;
+
+    NSMutableArray *buttonsArray = [[NSMutableArray alloc]initWithArray:self.toolBar.items];
+    [buttonsArray addObject:locationButton];
+    [self.toolBar setItems:buttonsArray];
+    
+//   [self.mapView setDelegate:(UITabBarController *) self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -29,8 +39,7 @@
     zoomLocation.latitude = 61.489987;
     zoomLocation.longitude= 23.780417;
     
-    MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(zoomLocation, 10000, 10000);
-    
+    MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(zoomLocation, 13000, 13000);
     [_mapView setRegion:viewRegion animated:YES];
     
     [self fetchAndRenderBusPositions];
@@ -77,11 +86,7 @@
         coordinate.latitude = latitude.doubleValue;
         coordinate.longitude = longitude.doubleValue;
         
-        MKPointAnnotation *point = [[MKPointAnnotation alloc] init];
-        point.coordinate = coordinate;
-        point.title = busLine;
-        point.subtitle = @"Test";
-        
+        TKLBusAnnotation *point = [[TKLBusAnnotation alloc] initWithBusLine:busLine coordinate:coordinate];        
         [_mapView addAnnotation:point];
     }
 }
@@ -90,6 +95,41 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(MKAnnotationView *)mapView:(MKMapView *)mapView
+           viewForAnnotation:(id<MKAnnotation>)annotation
+{
+    NSLog(@"mapView called");
+    if ([annotation isKindOfClass:[MKUserLocation class]])
+        return nil;
+    
+    static NSString *reuseId = @"reuseid";
+    MKAnnotationView *av = [mapView dequeueReusableAnnotationViewWithIdentifier:reuseId];
+    if (av == nil)
+    {
+        av = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:reuseId];
+        
+        UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
+        lbl.backgroundColor = [UIColor blackColor];
+        lbl.textColor = [UIColor whiteColor];
+        lbl.alpha = 0.5;
+        lbl.tag = 42;
+        [av addSubview:lbl];
+        
+        //Following lets the callout still work if you tap on the label...
+        av.canShowCallout = YES;
+        av.frame = lbl.frame;
+    }
+    else
+    {
+        av.annotation = annotation;
+    }
+    
+    UILabel *lbl = (UILabel *)[av viewWithTag:42];
+    lbl.text = annotation.title;
+    
+    return av;
 }
 
 @end

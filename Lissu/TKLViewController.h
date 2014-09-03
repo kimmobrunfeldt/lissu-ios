@@ -9,9 +9,13 @@
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 
-@interface TKLViewController : UIViewController
+@interface TKLViewController : UIViewController <MKMapViewDelegate>
 
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
+@property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
 @property (nonatomic, retain) NSTimer *timer;
+
+- (MKAnnotationView *)mapView:(MKMapView *)mapView
+            viewForAnnotation:(id<MKAnnotation>)annotation;
 
 @end

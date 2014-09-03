@@ -16,15 +16,38 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="CMu-n2-PtB">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" showsUserLocation="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CMu-n2-PtB">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="524"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="N6l-oZ-yUB"/>
+                                </connections>
                             </mapView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="b2N-oU-P1a">
+                                <rect key="frame" x="0.0" y="524" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="bF7-3B-2HT"/>
+                                </constraints>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="znY-f4-mml"/>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="b2N-oU-P1a" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="Gaq-fY-ujW"/>
+                            <constraint firstItem="b2N-oU-P1a" firstAttribute="top" secondItem="CMu-n2-PtB" secondAttribute="bottom" id="ZlK-GW-K5I"/>
+                            <constraint firstAttribute="trailing" secondItem="b2N-oU-P1a" secondAttribute="trailing" id="jGM-CW-0FQ"/>
+                            <constraint firstItem="CMu-n2-PtB" firstAttribute="leading" secondItem="b2N-oU-P1a" secondAttribute="leading" id="jt8-Gn-HQN"/>
+                            <constraint firstItem="CMu-n2-PtB" firstAttribute="top" secondItem="kh9-bI-dsS" secondAttribute="top" id="rdB-4G-37A"/>
+                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="b2N-oU-P1a" secondAttribute="bottom" id="yNP-v7-Cib"/>
+                            <constraint firstItem="CMu-n2-PtB" firstAttribute="trailing" secondItem="b2N-oU-P1a" secondAttribute="trailing" id="ynY-YA-Bwc"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="mapView" destination="CMu-n2-PtB" id="iyF-vt-7nH"/>
+                        <outlet property="toolBar" destination="b2N-oU-P1a" id="Uwf-ri-12d"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
