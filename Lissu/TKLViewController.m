@@ -27,15 +27,15 @@
     MKUserTrackingBarButtonItem *locationButton = [[MKUserTrackingBarButtonItem alloc] initWithMapView:self.mapView];
     self.navigationItem.leftBarButtonItem = locationButton;
 
-    NSMutableArray *buttonsArray = [[NSMutableArray alloc]initWithArray:self.toolBar.items];
+    NSMutableArray *buttonsArray = [[NSMutableArray alloc] initWithArray:self.toolBar.items];
     [buttonsArray addObject:locationButton];
     [self.toolBar setItems:buttonsArray];
-    
-//   [self.mapView setDelegate:(UITabBarController *) self];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     CLLocationCoordinate2D zoomLocation;
+
+    // Tampere
     zoomLocation.latitude = 61.489987;
     zoomLocation.longitude= 23.780417;
     
@@ -43,7 +43,7 @@
     [_mapView setRegion:viewRegion animated:YES];
     
     [self fetchAndRenderBusPositions];
-    self.timer = [NSTimer scheduledTimerWithTimeInterval:1.0
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:3.0
                                                 target:self
                                                 selector:@selector(timerFired:)
                                                 userInfo:nil
@@ -78,15 +78,15 @@
     for (NSDictionary *vehicle in vehicles) {
         NSLog(@"JSON: %@", vehicle[@"MonitoredVehicleJourney"][@"LineRef"][@"value"]);
         
+        NSString *busId = vehicle[@"MonitoredVehicleJourney"][@"VehicleRef"][@"value"];
+        NSString *busLine = vehicle[@"MonitoredVehicleJourney"][@"LineRef"][@"value"];
         NSNumber *latitude = vehicle[@"MonitoredVehicleJourney"][@"VehicleLocation"][@"Latitude"];
         NSNumber *longitude = vehicle[@"MonitoredVehicleJourney"][@"VehicleLocation"][@"Longitude"];
-        NSString *busLine = vehicle[@"MonitoredVehicleJourney"][@"LineRef"][@"value"];
-        
         CLLocationCoordinate2D coordinate;
         coordinate.latitude = latitude.doubleValue;
         coordinate.longitude = longitude.doubleValue;
         
-        TKLBusAnnotation *point = [[TKLBusAnnotation alloc] initWithBusLine:busLine coordinate:coordinate];        
+        TKLBusAnnotation *point = [[TKLBusAnnotation alloc] initWithBusLine:busId busLine:busLine coordinate:coordinate];
         [_mapView addAnnotation:point];
     }
 }
@@ -97,39 +97,40 @@
     // Dispose of any resources that can be recreated.
 }
 
--(MKAnnotationView *)mapView:(MKMapView *)mapView
-           viewForAnnotation:(id<MKAnnotation>)annotation
+-(MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
 {
-    NSLog(@"mapView called");
     if ([annotation isKindOfClass:[MKUserLocation class]])
         return nil;
     
     static NSString *reuseId = @"reuseid";
-    MKAnnotationView *av = [mapView dequeueReusableAnnotationViewWithIdentifier:reuseId];
-    if (av == nil)
-    {
-        av = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:reuseId];
+    MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:reuseId];
+    if (annotationView == nil) {
+        annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:reuseId];
+    
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 26, 26)];
+
+        label.textAlignment = NSTextAlignmentCenter;
+
+        label.backgroundColor = [UIColor colorWithRed:114.0/255.0 green:163.0/255.0 blue:191.0/255.0 alpha:0.9];
+        label.textColor = [UIColor whiteColor];
+        label.tag = 42;
+        label.adjustsFontSizeToFitWidth = YES;
+        label.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
+        label.numberOfLines = 1;
+        label.layer.cornerRadius = 13;
+        label.clipsToBounds = YES;
+        [label setFont:[UIFont systemFontOfSize:12]];
+        [annotationView addSubview:label];
         
-        UILabel *lbl = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 50, 30)];
-        lbl.backgroundColor = [UIColor blackColor];
-        lbl.textColor = [UIColor whiteColor];
-        lbl.alpha = 0.5;
-        lbl.tag = 42;
-        [av addSubview:lbl];
-        
-        //Following lets the callout still work if you tap on the label...
-        av.canShowCallout = YES;
-        av.frame = lbl.frame;
-    }
-    else
-    {
-        av.annotation = annotation;
+        annotationView.frame = label.frame;
+    } else {
+        annotationView.annotation = annotation;
     }
     
-    UILabel *lbl = (UILabel *)[av viewWithTag:42];
-    lbl.text = annotation.title;
+    UILabel *label = (UILabel *)[annotationView viewWithTag:42];
+    label.text = annotation.title;
     
-    return av;
+    return annotationView;
 }
 
 @end

@@ -11,7 +11,12 @@
 
 @interface TKLBusAnnotation()
 
+// VehicleRef, e.g. @"TKL_267"
+@property (nonatomic, copy) NSString *busId;
+
+// LineRef, e.g. @"13"
 @property (nonatomic, copy) NSString *busLine;
+
 // Variable named coordinate is reserved for internal use
 @property (nonatomic, assign) CLLocationCoordinate2D busCoordinate;
 
@@ -19,8 +24,9 @@
 
 @implementation TKLBusAnnotation
 
-- (id)initWithBusLine:(NSString*)busLine coordinate:(CLLocationCoordinate2D)coordinate {
+- (id)initWithBusLine:(NSString*)busId busLine:(NSString*)busLine coordinate:(CLLocationCoordinate2D)coordinate {
     if ((self = [super init])) {
+        self.busId = busId;
         self.busLine = busLine;
         self.busCoordinate = coordinate;
     }
@@ -50,7 +56,5 @@
     
     return mapItem;
 }
-
-
 
 @end

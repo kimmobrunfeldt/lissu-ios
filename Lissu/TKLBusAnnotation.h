@@ -12,7 +12,7 @@
 
 @interface TKLBusAnnotation : NSObject <MKAnnotation>
 
-- (id)initWithBusLine:(NSString*)busLine coordinate:(CLLocationCoordinate2D)coordinate;
+- (id)initWithBusLine:(NSString*)busId busLine:(NSString*)busLine coordinate:(CLLocationCoordinate2D)coordinate;
 - (MKMapItem*)mapItem;
 
 @end

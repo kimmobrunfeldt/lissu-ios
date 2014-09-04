@@ -15,7 +15,6 @@
 @property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
 @property (nonatomic, retain) NSTimer *timer;
 
-- (MKAnnotationView *)mapView:(MKMapView *)mapView
-            viewForAnnotation:(id<MKAnnotation>)annotation;
+- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation;
 
 @end
