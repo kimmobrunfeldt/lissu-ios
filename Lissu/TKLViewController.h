@@ -11,10 +11,12 @@
 
 @interface TKLViewController : UIViewController <MKMapViewDelegate>
 
-@property (weak, nonatomic) IBOutlet MKMapView *mapView;
-@property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
-@property (nonatomic, retain) NSTimer *timer;
+- (MKAnnotationView*)mapView:(MKMapView*)mapView viewForAnnotation:(id<MKAnnotation>)annotation;
+- (void)mapView:(MKMapView*)mapView regionWillChangeAnimated:(BOOL)animated;
 
-- (MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation;
+@property (strong, nonatomic) IBOutlet MKMapView *mapView;
+@property (strong, nonatomic) IBOutlet UIToolbar *toolBar;
+@property (strong) NSTimer *timer;
+@property (strong) NSMutableArray *buses;
 
 @end

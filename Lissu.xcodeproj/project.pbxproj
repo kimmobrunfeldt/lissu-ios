@@ -23,6 +23,7 @@
 		644AA63019B517F300F2382E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 644AA62E19B517F300F2382E /* InfoPlist.strings */; };
 		644AA63219B517F300F2382E /* LissuTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 644AA63119B517F300F2382E /* LissuTests.m */; };
 		644AA63C19B5181B00F2382E /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 644AA63B19B5181B00F2382E /* MapKit.framework */; };
+		647B531719BBA06300BC5B47 /* TKLBus.m in Sources */ = {isa = PBXBuildFile; fileRef = 647B531619BBA06300BC5B47 /* TKLBus.m */; };
 		64CD041E19B63CD600B629E3 /* TKLBusAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 64CD041D19B63CD600B629E3 /* TKLBusAnnotation.m */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +59,8 @@
 		644AA62F19B517F300F2382E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		644AA63119B517F300F2382E /* LissuTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LissuTests.m; sourceTree = "<group>"; };
 		644AA63B19B5181B00F2382E /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		647B531119BB922100BC5B47 /* TKLBus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKLBus.h; sourceTree = "<group>"; };
+		647B531619BBA06300BC5B47 /* TKLBus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TKLBus.m; sourceTree = "<group>"; };
 		64CD041C19B63CD600B629E3 /* TKLBusAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKLBusAnnotation.h; sourceTree = "<group>"; };
 		64CD041D19B63CD600B629E3 /* TKLBusAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TKLBusAnnotation.m; sourceTree = "<group>"; };
 		97E8B468D9CD45AF8F7C49AC /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,6 +128,8 @@
 		644AA60C19B517F300F2382E /* Lissu */ = {
 			isa = PBXGroup;
 			children = (
+				647B531119BB922100BC5B47 /* TKLBus.h */,
+				647B531619BBA06300BC5B47 /* TKLBus.m */,
 				644AA61519B517F300F2382E /* TKLAppDelegate.h */,
 				644AA61619B517F300F2382E /* TKLAppDelegate.m */,
 				644AA61819B517F300F2382E /* Main.storyboard */,
@@ -303,6 +308,7 @@
 				644AA61719B517F300F2382E /* TKLAppDelegate.m in Sources */,
 				64CD041E19B63CD600B629E3 /* TKLBusAnnotation.m in Sources */,
 				644AA61319B517F300F2382E /* main.m in Sources */,
+				647B531719BBA06300BC5B47 /* TKLBus.m in Sources */,
 				644AA61D19B517F300F2382E /* TKLViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -434,6 +440,7 @@
 				INFOPLIST_FILE = "Lissu/Lissu-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -449,6 +456,7 @@
 				INFOPLIST_FILE = "Lissu/Lissu-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

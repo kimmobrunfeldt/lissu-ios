@@ -9,10 +9,15 @@
 #import <Foundation/Foundation.h>
 #import <MapKit/MapKit.h>
 
+@class TKLBus;
 
 @interface TKLBusAnnotation : NSObject <MKAnnotation>
 
-- (id)initWithBusLine:(NSString*)busId busLine:(NSString*)busLine coordinate:(CLLocationCoordinate2D)coordinate;
+@property (nonatomic) TKLBus *bus;
+@property (nonatomic, assign) CLLocationCoordinate2D coordinate;
+
+- (id)initWithBus:(TKLBus*)bus;
+
 - (MKMapItem*)mapItem;
 
 @end

@@ -9,18 +9,14 @@
 #import <MapKit/MapKit.h>
 #import "AFNetworking.h"
 
+#import "TKLBus.h"
 #import "TKLViewController.h"
 #import "TKLBusAnnotation.h"
 
 
-@interface TKLViewController ()
-
-@end
-
 @implementation TKLViewController
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
 
     // Add location button
@@ -30,6 +26,8 @@
     NSMutableArray *buttonsArray = [[NSMutableArray alloc] initWithArray:self.toolBar.items];
     [buttonsArray addObject:locationButton];
     [self.toolBar setItems:buttonsArray];
+
+    _buses = [[NSMutableArray alloc] init];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
@@ -42,12 +40,21 @@
     MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(zoomLocation, 13000, 13000);
     [_mapView setRegion:viewRegion animated:YES];
     
+    
     [self fetchAndRenderBusPositions];
     self.timer = [NSTimer scheduledTimerWithTimeInterval:3.0
                                                 target:self
                                                 selector:@selector(timerFired:)
                                                 userInfo:nil
                                                 repeats:YES];
+    
+}
+
+- (void)animateLoader {
+    UIActivityIndicatorView *activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    activityView.center = self.view.center;
+    [activityView startAnimating];
+    [self.view addSubview:activityView];
 }
 
 - (void)timerFired:(NSTimer*)timer {
@@ -58,6 +65,7 @@
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     manager.requestSerializer = [AFJSONRequestSerializer serializer];
     
+    // http://data.itsfactory.fi/siriaccess/vm/json
     [manager GET:@"http://data.itsfactory.fi/siriaccess/vm/json" parameters:nil
     success:^(AFHTTPRequestOperation *operation, id responseObject) {
         [self onDataSuccess:responseObject];
@@ -68,12 +76,7 @@
 }
 
 - (void)onDataSuccess:(id)jsonResponse {
-    
     NSDictionary *vehicles = jsonResponse[@"Siri"][@"ServiceDelivery"][@"VehicleMonitoringDelivery"][0][@"VehicleActivity"];
-    
-    for (id<MKAnnotation> annotation in _mapView.annotations) {
-        [_mapView removeAnnotation:annotation];
-    }
     
     for (NSDictionary *vehicle in vehicles) {
         NSLog(@"JSON: %@", vehicle[@"MonitoredVehicleJourney"][@"LineRef"][@"value"]);
@@ -85,25 +88,63 @@
         CLLocationCoordinate2D coordinate;
         coordinate.latitude = latitude.doubleValue;
         coordinate.longitude = longitude.doubleValue;
-        
-        TKLBusAnnotation *point = [[TKLBusAnnotation alloc] initWithBusLine:busId busLine:busLine coordinate:coordinate];
-        [_mapView addAnnotation:point];
+    
+        TKLBus *bus = [self findBus:busId];
+        if (bus == nil) {
+            [self createBusAnnotation:busId busLine:busLine busCoordinate:coordinate];
+        } else {
+            [self moveBusAnnotation:bus coordinate:coordinate];
+        }
     }
+
 }
 
-- (void)didReceiveMemoryWarning
-{
+- (void)createBusAnnotation:(NSString*)busId busLine:(NSString*)busLine busCoordinate:(CLLocationCoordinate2D)busCoordinate {
+    NSLog(@"createBusAnnotation");
+    TKLBus *bus = [[TKLBus alloc] init];
+    bus.identifier = busId;
+    bus.line = busLine;
+    bus.coordinate = busCoordinate;
+    
+    TKLBusAnnotation *annotation = [[TKLBusAnnotation alloc] initWithBus:bus];
+    [_mapView addAnnotation:annotation];
+    
+    bus.annotation = annotation;
+    [_buses addObject:bus];
+}
+
+- (void)moveBusAnnotation:(TKLBus*)bus coordinate:(CLLocationCoordinate2D)coordinate {
+    [UIView animateWithDuration:0.5f
+    animations:^(void){
+        bus.annotation.coordinate = coordinate;
+    }];
+     
+    NSLog(@"moveBusAnnotation");
+}
+
+- (TKLBus*)findBus:(NSString*)busId {
+    for (TKLBus *bus in _buses) {
+        if ([busId isEqualToString:bus.identifier]) {
+            return bus;
+        }
+    }
+    
+    return nil;
+}
+
+
+- (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
--(MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation
-{
+-(MKAnnotationView *)mapView:(MKMapView *)mapView viewForAnnotation:(id<MKAnnotation>)annotation {
     if ([annotation isKindOfClass:[MKUserLocation class]])
         return nil;
     
-    static NSString *reuseId = @"reuseid";
+    static NSString *reuseId = @"bus";
     MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:reuseId];
+
     if (annotationView == nil) {
         annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:reuseId];
     
@@ -131,6 +172,20 @@
     label.text = annotation.title;
     
     return annotationView;
+}
+
+- (void)mapView:(MKMapView*)mapView regionWillChangeAnimated:(BOOL)animated {
+    // Stop all animations when map is zoomed / panned
+    NSLog(@"regionWillChangeAnimated");
+    for (int i = 0; i < [mapView.annotations count]; i++) {
+        id annotation = [mapView.annotations objectAtIndex:i];
+        
+        MKAnnotationView *annotationView = [mapView viewForAnnotation: annotation];
+        if (annotationView != nil) {
+            CALayer* layer = annotationView.layer;
+            [layer removeAllAnimations];
+        }
+    }
 }
 
 @end
