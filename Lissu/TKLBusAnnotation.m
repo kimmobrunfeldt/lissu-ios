@@ -30,6 +30,10 @@
     return @"";
 }
 
+- (void)setBearing:(NSNumber *)bearing {
+    //UIImage *rotatedImage = [originalImage imageRotatedByDegrees:90.0];
+}
+
 - (MKMapItem*)mapItem {
     NSDictionary *addressDict = @{(NSString *) kABPersonAddressStreetKey : @""};
     MKPlacemark *placemark = [[MKPlacemark alloc]

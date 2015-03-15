@@ -15,6 +15,7 @@
 
 @property (nonatomic) TKLBus *bus;
 @property (nonatomic, assign) CLLocationCoordinate2D coordinate;
+@property (nonatomic, assign) NSNumber *bearing;
 
 - (id)initWithBus:(TKLBus*)bus;
 

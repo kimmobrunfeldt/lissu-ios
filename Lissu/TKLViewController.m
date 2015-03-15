@@ -40,6 +40,8 @@
     MKCoordinateRegion viewRegion = MKCoordinateRegionMakeWithDistance(zoomLocation, 13000, 13000);
     [_mapView setRegion:viewRegion animated:YES];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillTerminate:) name:UIApplicationWillTerminateNotification object:nil];
     
     [self fetchAndRenderBusPositions];
     self.timer = [NSTimer scheduledTimerWithTimeInterval:3.0
@@ -47,6 +49,17 @@
                                                 selector:@selector(timerFired:)
                                                 userInfo:nil
                                                 repeats:YES];
+    
+}
+
+-(void)appWillResignActive:(NSNotification*)note
+{
+    
+}
+-(void)appWillTerminate:(NSNotification*)note
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillTerminateNotification object:nil];
     
 }
 
@@ -65,8 +78,7 @@
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     manager.requestSerializer = [AFJSONRequestSerializer serializer];
     
-    // http://data.itsfactory.fi/siriaccess/vm/json
-    [manager GET:@"http://data.itsfactory.fi/siriaccess/vm/json" parameters:nil
+    [manager GET:@"http://lissu-api-backup.herokuapp.com" parameters:nil
     success:^(AFHTTPRequestOperation *operation, id responseObject) {
         [self onDataSuccess:responseObject];
     }
@@ -76,35 +88,39 @@
 }
 
 - (void)onDataSuccess:(id)jsonResponse {
-    NSDictionary *vehicles = jsonResponse[@"Siri"][@"ServiceDelivery"][@"VehicleMonitoringDelivery"][0][@"VehicleActivity"];
+    NSDictionary *vehicles = jsonResponse[@"vehicles"];
     
     for (NSDictionary *vehicle in vehicles) {
-        NSLog(@"JSON: %@", vehicle[@"MonitoredVehicleJourney"][@"LineRef"][@"value"]);
+        NSLog(@"JSON: %@", vehicle[@"line"]);
         
-        NSString *busId = vehicle[@"MonitoredVehicleJourney"][@"VehicleRef"][@"value"];
-        NSString *busLine = vehicle[@"MonitoredVehicleJourney"][@"LineRef"][@"value"];
-        NSNumber *latitude = vehicle[@"MonitoredVehicleJourney"][@"VehicleLocation"][@"Latitude"];
-        NSNumber *longitude = vehicle[@"MonitoredVehicleJourney"][@"VehicleLocation"][@"Longitude"];
+        NSString *busId = vehicle[@"id"];
+        NSString *busLine = vehicle[@"line"];
+        NSNumber *latitude = vehicle[@"latitude"];
+        NSNumber *longitude = vehicle[@"longitude"];
+        NSNumber *bearing = vehicle[@"rotation"];
         CLLocationCoordinate2D coordinate;
         coordinate.latitude = latitude.doubleValue;
         coordinate.longitude = longitude.doubleValue;
     
         TKLBus *bus = [self findBus:busId];
         if (bus == nil) {
-            [self createBusAnnotation:busId busLine:busLine busCoordinate:coordinate];
+            [self createBusAnnotation:busId busLine:busLine busCoordinate:coordinate bearing:bearing];
         } else {
             [self moveBusAnnotation:bus coordinate:coordinate];
         }
     }
+    
+    // TODO: remove left overs
 
 }
 
-- (void)createBusAnnotation:(NSString*)busId busLine:(NSString*)busLine busCoordinate:(CLLocationCoordinate2D)busCoordinate {
+- (void)createBusAnnotation:(NSString*)busId busLine:(NSString*)busLine busCoordinate:(CLLocationCoordinate2D)busCoordinate bearing:(NSNumber*)bearing {
     NSLog(@"createBusAnnotation");
     TKLBus *bus = [[TKLBus alloc] init];
     bus.identifier = busId;
     bus.line = busLine;
     bus.coordinate = busCoordinate;
+    bus.bearing = bearing;
     
     TKLBusAnnotation *annotation = [[TKLBusAnnotation alloc] initWithBus:bus];
     [_mapView addAnnotation:annotation];
@@ -114,11 +130,19 @@
 }
 
 - (void)moveBusAnnotation:(TKLBus*)bus coordinate:(CLLocationCoordinate2D)coordinate {
+    /*
     [UIView animateWithDuration:0.5f
     animations:^(void){
         bus.annotation.coordinate = coordinate;
     }];
-     
+     */
+    [bus.annotation setCoordinate:coordinate];
+
+    // TODO: 
+    // Get annotation view from annotation somehow
+    // there's a subview which contains UIImageView
+    // then set new transform for that view.
+    
     NSLog(@"moveBusAnnotation");
 }
 
@@ -144,21 +168,29 @@
     
     static NSString *reuseId = @"bus";
     MKAnnotationView *annotationView = [mapView dequeueReusableAnnotationViewWithIdentifier:reuseId];
-
+    
     if (annotationView == nil) {
         annotationView = [[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:reuseId];
-    
+        
+        // Convert passed annotation to our custom annotation annotation
+        TKLBusAnnotation *busAnnotation = (TKLBusAnnotation*) annotation;
+        TKLBus *bus = busAnnotation.bus;
+        BOOL isMoving = ![bus.bearing isEqual:@0];
+        NSString *busIcon = (isMoving) ? @"bus-moving" : @"bus";
+        UIImage *busIconImage = [UIImage imageNamed:busIcon];
+
+        UIImageView *uiImageView = [[UIImageView alloc] initWithImage:busIconImage];
+        uiImageView.transform = CGAffineTransformMakeRotation([bus.bearing floatValue]);
+        [annotationView addSubview:uiImageView];
+        
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 26, 26)];
-
         label.textAlignment = NSTextAlignmentCenter;
-
-        label.backgroundColor = [UIColor colorWithRed:114.0/255.0 green:163.0/255.0 blue:191.0/255.0 alpha:0.9];
+        label.backgroundColor = [UIColor clearColor];
         label.textColor = [UIColor whiteColor];
         label.tag = 42;
         label.adjustsFontSizeToFitWidth = YES;
         label.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
         label.numberOfLines = 1;
-        label.layer.cornerRadius = 13;
         label.clipsToBounds = YES;
         [label setFont:[UIFont systemFontOfSize:12]];
         [annotationView addSubview:label];

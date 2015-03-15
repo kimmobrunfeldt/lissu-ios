@@ -22,6 +22,11 @@
 // Bus' location
 @property (nonatomic) CLLocationCoordinate2D coordinate;
 
+// Bearing, in degrees, clockwise from True North, i.e., 0 is North and 90 is
+// East. This can be the compass bearing, or the direction towards the next
+// stop or intermediate location
+@property (nonatomic) NSNumber *bearing;
+
 // Reference to map annotation
 @property (strong) TKLBusAnnotation *annotation;
 
